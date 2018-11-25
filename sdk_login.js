@@ -52,8 +52,16 @@ login.loginByGuest = function (uuid) {
 	});
 };
 
-login.loginBySnsIdNoVerify = function () {
-
+/*
+ * 第三方账号登录
+ *
+ * uuid: 玩家唯一标识
+ * snsInfo: 第三方账号的一些信息
+ */
+login.loginBySnsIdNoVerify = function (uuid, snsInfo) {
+	return new Promise(function (resolve, reject) {
+		// TODO
+	});
 };
 
 module.exports = login;

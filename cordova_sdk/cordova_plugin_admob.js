@@ -275,10 +275,10 @@ AdMobObj.prototype.showInterstitial = function (successCallback, failureCallback
                 }.bind(this));
             } else {
                 logManager.LOGD("AdMobObj.isInterstitialReady.  interstitial not ready......");
-
-                failureCallback();
                 this._interstitialSuccessCallback = null;
                 this._interstitialFailCallback = null;
+                failureCallback();
+
             }
         }.bind(this));
     } else if (this._interstitialAdStatus === this._rewardVideoAdStatus_Enum.loadedfail

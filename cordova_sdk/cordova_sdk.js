@@ -105,8 +105,8 @@ CordovaSDK.prototype.trackEvent = function (tokenKey, params) {
 
 // 游客登录
 CordovaSDK.prototype.loginByGuest = function (successCallback, failureCallback) {
-    loginManager.loginByGuest(this.getUuid()).then(function () {
-        logManager.LOGD('CordovaSDK.loginByGuest successful');
+    loginManager.loginByGuest(this.getUuid()).then(function (ret) {
+        logManager.LOGD('CordovaSDK.loginByGuest successful ' + JSON.stringify(ret));
 
         successCallback();
     }).catch(function (err) {

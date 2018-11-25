@@ -44,6 +44,7 @@ config.AdsConfig = {
 config.fbConfig = {
     interstitial: 'my_placement_id', // 插屏广告id
     rewardvideo: 'my_placement_id',  // 奖励广告id
+    appId: '', // fb的appid
 };
 
 config.AdjustInfo = {

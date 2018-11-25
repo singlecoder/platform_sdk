@@ -175,12 +175,24 @@ FBSDK.prototype.shareToFriend = function (type, title, imageUrl, extraInfo, succ
 /***** 登录模块 *****/
 
 FBSDK.prototype.loginBySnsId = function (successCallback, failureCallback) {
-	FBInstant.player.getSignedPlayerInfoAsync('my_metadata').then((ret) => {
+	FBInstant.player.getSignedPlayerInfoAsync('my_metadata').then((result) => {
+		logManager.LOGD('FBInstant.getSignedPlayerInfoAsync successful ' + JSON.stringify(result));
+
+		return loginManager.loginBySnsIdNoVerify(result.getPlayerID(), {
+			'snsId': 'fbinstant:' + result.getPlayerID(),
+			'name': FBInstant.player.getName(),
+			'purl': FBInstant.player.getPhoto(),
+			'fb_appid': config.fbConfig.appId,
+			'signature': ''
+		});
+	}).then((ret) => {
 		logManager.LOGD('FBSDK.loginBySnsId successful ' + JSON.stringify(ret));
 
-		loginManager.loginBySnsIdNoVerify();
+		successCallback();
 	}).catch((err) => {
 		logManager.LOGD('FBSDK.loginBySnsId error ' + JSON.stringify(err));
+
+		failureCallback();
 	});
 };
 
