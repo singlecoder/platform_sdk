@@ -292,6 +292,7 @@ AdMobObj.prototype.showInterstitial = function (successCallback, failureCallback
 
         this._initInterstitial();
     }else{
+        logManager.LOGE("AdMobObj.showInterstitial not loaded...");
         this._interstitialSuccessCallback = null;
         this._interstitialFailCallback = null;
 
@@ -319,7 +320,7 @@ AdMobObj.prototype.showRewardVideoAd = function (successCallback, failureCallbac
         }.bind(this));
     } else if(this._rewardVideoAdStatus === this._rewardVideoAdStatus_Enum.loadedfail
         || this._rewardVideoAdStatus === this._rewardVideoAdStatus_Enum.dismiss ) {
-        logManager.LOGD("loadedfail or dismiss......");
+        logManager.LOGD("AdMobObj.showRewardVideoAd loadedfail or dismiss......");
 
         this._rewardVideoSuccessCallback = successCallback;
         this._rewardVideoFailCallback = failureCallback;
@@ -327,6 +328,7 @@ AdMobObj.prototype.showRewardVideoAd = function (successCallback, failureCallbac
 
         this._initRewardVideoAd();
     }else{
+        logManager.LOGE("AdMobObj.showRewardVideoAd not loaded...");
         this._rewardVideoSuccessCallback = null;
         this._rewardVideoFailCallback = null;
 

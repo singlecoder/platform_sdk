@@ -11,8 +11,6 @@ var config = require('../sdk_config');
 var sdkTool = require('../sdk_tool');
 
 var FBSDK = function () {
-	this._supportAPIs = FBInstant.getSupportedAPIs();
-
 	// 广告模块
 	this._interstitialInstance = null;
 	this._interstitialLoaded = false;
@@ -29,7 +27,7 @@ var FBSDK = function () {
 /***** 广告模块 *****/
 
 FBSDK.prototype._initInterstitial = function () {
-	if (this._supportAPIs.includes('getInterstitialAdAsync')) {
+	if (FBInstant.getSupportedAPIs().includes('getInterstitialAdAsync')) {
 		FBInstant.getInterstitialAdAsync(
 			config.fbConfig.interstitial
 		).then((interstitial) => {
@@ -62,7 +60,7 @@ FBSDK.prototype.showInterstitial = function(successCallback, failureCallback) {
 };
 
 FBSDK.prototype._initRewardVideoAd = function () {
-	if (this._supportAPIs.includes('getRewardedVideoAsync')) {
+	if (FBInstant.getSupportedAPIs().includes('getRewardedVideoAsync')) {
 		FBInstant.getRewardedVideoAsync(
 			config.fbConfig.rewardvideo
 		).then((rewardvideo) => {
@@ -110,7 +108,7 @@ FBSDK.prototype.showAdsWithPolicy = function (successCallback, failureCallback) 
  * imageUrl: 分享的图片，本地或者url都可以
  * extraInfo: 扩展信息
  */
-FBSDK.prototype.shareAsync = function (title, imageUrl, extraInfo, successCallback, failureCallback) {
+FBSDK.prototype.shareToTimeline = function (title, imageUrl, extraInfo, successCallback, failureCallback) {
 	sdkTool.getBase64Image(imageUrl, (imageBase64) => {
 		logManager.LOGD('get base64 image result ' + imageBase64);
 
@@ -123,7 +121,7 @@ FBSDK.prototype.shareAsync = function (title, imageUrl, extraInfo, successCallba
 			// 分享出去或者关闭对话框都会走这里
 			successCallback && successCallback(ret);
 		}).catch((err) => {
-			logManager.LOGD('shareAsync error ' + JSON.stringify(err));
+			logManager.LOGD('shareToTimeline error ' + JSON.stringify(err));
 
 			failureCallback && failureCallback();
 		});

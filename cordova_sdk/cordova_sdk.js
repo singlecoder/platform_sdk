@@ -20,7 +20,7 @@ var CordovaSDK = function () {
     this._device = new Device(); // 设备信息
     this._adjust = new AdjustObj(config.AdjustInfo); // adjust
 
-    this._test();
+    // this._test();
 };
 
 // test
@@ -62,6 +62,10 @@ CordovaSDK.prototype.showBannerAtXY = function (x, y) {
     return this._admob.showBannerAtXY(x, y)
 };
 
+CordovaSDK.prototype.hideBanner = function () {
+    return this._admob.hideBanner();
+};
+
 CordovaSDK.prototype.showRewardVideoAd = function (successCallback, failureCallback) {
     return this._admob.showRewardVideoAd(successCallback, failureCallback);
 };
@@ -70,9 +74,7 @@ CordovaSDK.prototype.showAdsWithPolicy = function (successCallback, failureCallb
     return this._admob.showAdsWithPolicy(successCallback, failureCallback);
 };
 
-CordovaSDK.prototype.hideBanner = function () {
-    return this._admob.showRewardVideoAd();
-};
+
 
 // device
 CordovaSDK.prototype.getUuid = function () {

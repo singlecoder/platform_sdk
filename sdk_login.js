@@ -7,6 +7,7 @@
 var config = require('./sdk_config');
 var logManager = require('./sdk_log');
 var httpManager = require('./sdk_http');
+var tool = require('./sdk_tool');
 
 var login = {};
 

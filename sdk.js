@@ -25,7 +25,8 @@ class SDK {
 
     constructor () {
         let RealSDK = null;
-        switch (config.baseInfo.platform) {
+        let platform = tool.getPublishPlatform();
+        switch (platform) {
             case 'fb':
                 RealSDK = require('./fb_sdk/fb_sdk');
                 break;
@@ -34,6 +35,9 @@ class SDK {
                 break;
             case 'wx':
                 RealSDK = require('./wx_sdk/wx_sdk');
+                break;
+            case 'web':
+                RealSDK = require('./web_sdk/web_sdk');
                 break;
             default:
                 RealSDK = class {};
@@ -80,6 +84,11 @@ class SDK {
     showBannerAtXY (x, y) {
         logManager.LOGD("sdk.showBannerAtXY...");
         this._sdk.showBannerAtXY && this._sdk.showBannerAtXY(x, y);
+    }
+
+    hideBanner(){
+        logManager.LOGD("sdk.hideBanner...");
+        this._sdk.hideBanner && this._sdk.hideBanner();
     }
 
     showInterstitial (successCallback, failureCallback) {
@@ -143,6 +152,26 @@ class SDK {
 
         if (this._sdk.shareToFriend) {
             this._sdk.shareToFriend(type || 'friend', title, imageUrl, extraInfo, successCallback, failureCallback);
+        } else {
+            failureCallback();
+        }
+    }
+
+    /*
+     * 拉起分享到朋友圈的对话框
+     *
+     * title: 标题
+     * imageUrl: 分享的图片，本地或者url都可以
+     * extraInfo: 扩展信息，主要bi打点用
+     */
+    shareToTimeline (title, imageUrl, extraInfo, successCallback, failureCallback) {
+        logManager.LOGD('sdk.shareToTimeline...');
+
+        successCallback = successCallback || function () {};
+        failureCallback = failureCallback || function () {};
+
+        if (this._sdk.shareToTimeline) {
+            this._sdk.shareToTimeline(title, imageUrl, extraInfo, successCallback, failureCallback);
         } else {
             failureCallback();
         }

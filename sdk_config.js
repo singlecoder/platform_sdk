@@ -9,14 +9,6 @@ var config = {};
 // 项目配置的一些基本信息
 config.baseInfo = {
 	debug: true, // 是否debug模式，上线必须设置为false
-	/*
-	 * 根据发布的不同平台设置即可
-	 * 微信小游戏：wx
-	 * facebook：fb
-	 * cordova：cordova
-	 */
-	platform: '',
-    supportPlatforms: ['fb', 'cordova', 'wx'],
 };
 
 config.AdsConfig = {
@@ -24,19 +16,19 @@ config.AdsConfig = {
     isTest: config.baseInfo.debug, // 上线必须设置为false,否则不计算收益
     admobIds: {
         android: { // for Android
-            banner: 'ca-app-pub-4647010395903141/5180954621',
-            interstitial: 'ca-app-pub-4647010395903141/7989992939',
-            rewardvideo: 'ca-app-pub-3940256099942544/5224354917',
+            banner: 'ca-app-pub-3180535698853578/1576771014',
+            interstitial: 'ca-app-pub-3180535698853578/8688974274',
+            rewardvideo: 'ca-app-pub-3180535698853578/9427340872',
         },
         ios: { // for iOS
-            banner: 'ca-app-pub-4647010395903141/5180954621',
-            interstitial: 'ca-app-pub-4647010395903141/7989992939',
-            rewardvideo: 'ca-app-pub-4647010395903141/6410275819',
+            banner: 'ca-app-pub-3180535698853578/5843319084',
+            interstitial: 'ca-app-pub-3180535698853578/4830578177',
+            rewardvideo: 'ca-app-pub-3180535698853578/1629699769',
         },
         wp: { // for windows phone
-            banner: 'ca-app-pub-4647010395903141/5180954621',
-            interstitial: 'ca-app-pub-4647010395903141/7989992939',
-            rewardvideo: 'ca-app-pub-4647010395903141/6410275819',
+            banner: '',
+            interstitial: '',
+            rewardvideo: '',
         },
     },
 };
