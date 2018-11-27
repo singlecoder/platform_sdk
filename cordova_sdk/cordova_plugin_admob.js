@@ -16,10 +16,10 @@ var AdMobObj = function (adsConfig) {
         'BOTTOM_CENTER': window['AdMob']['AD_POSITION']['BOTTOM_CENTER']
     };
 
-    this._rewardVideoAdStatus_Enum = {
+    this._AdStatus_Enum = {
         none: 0,
         loading: 1,
-        loaded:2,
+        loaded: 2,
         loadedfail: 3,
         present: 4,
         dismiss: 5,
@@ -33,8 +33,8 @@ var AdMobObj = function (adsConfig) {
         this._admobid = this._ad_units.admobIds.wp;
     }
 
-    this._rewardVideoAdStatus = this._rewardVideoAdStatus_Enum.none; // 状态，0：无状态，1：loading状态，2：loading失败状态，3：
-    this._interstitialAdStatus = this._rewardVideoAdStatus_Enum.none;
+    this._rewardVideoAdStatus = this._AdStatus_Enum.none; // 状态，0：无状态，1：loading状态，2：loading失败状态，3：
+    this._interstitialAdStatus = this._AdStatus_Enum.none;
 
     this._bannerOk = false; // banner 数据是否加载成功
 
@@ -61,16 +61,16 @@ AdMobObj.prototype._listen = function () {
 
     // 从服务器加载数据失败
     window['document']['addEventListener']('onAdFailLoad', function (info) {
-        logManager.LOGD("onAdFailLoad..." + info);
+        logManager.LOGD("onAdFailLoad...", info, info['adType']);
         switch (info['adType']) {
             case 'banner':
                 this._bannerOk = false;
                 break;
             case 'interstitial':
-            	this._interstitialAdStatus = this._rewardVideoAdStatus_Enum.loadedfail;
-            	break;
+                this._interstitialAdStatus = this._AdStatus_Enum.loadedfail;
+                break;
             case 'rewardvideo':
-                this._rewardVideoAdStatus = this._rewardVideoAdStatus_Enum.loadedfail;
+                this._rewardVideoAdStatus = this._AdStatus_Enum.loadedfail;
                 break;
             default:
                 break;
@@ -79,7 +79,7 @@ AdMobObj.prototype._listen = function () {
 
     // 从服务器加载数据成功
     window['document']['addEventListener']('onAdLoaded', function (info) {
-        logManager.LOGD("onAdLoaded..." + info);
+        logManager.LOGD("onAdLoaded...", info, info['adType']);
         switch (info['adType']) {
             case 'banner':
                 this._bannerOk = true;
@@ -91,10 +91,10 @@ AdMobObj.prototype._listen = function () {
 
                 break;
             case 'interstitial':
-                this._interstitialAdStatus = this._rewardVideoAdStatus_Enum.loaded;
+                this._interstitialAdStatus = this._AdStatus_Enum.loaded;
                 break;
             case 'rewardvideo':
-                this._rewardVideoAdStatus = this._rewardVideoAdStatus_Enum.loaded;
+                this._rewardVideoAdStatus = this._AdStatus_Enum.loaded;
                 break;
             default:
                 break;
@@ -103,17 +103,17 @@ AdMobObj.prototype._listen = function () {
 
     // 成功播放完，发放奖励
     window['document']['addEventListener']('onAdPresent', function (info) {
-        logManager.LOGD("onAdPresent..." + info);
+        logManager.LOGD("onAdPresent...", info, info['adType']);
         // logManager.LOGD("onAdPresent..." + JSON.stringify(info));
         // TODO
         switch (info['adType']) {
             case 'banner':
                 break;
             case 'interstitial':
-            	this._interstitialAdStatus = this._rewardVideoAdStatus_Enum.present;
+                this._interstitialAdStatus = this._AdStatus_Enum.present;
                 break;
             case 'rewardvideo':
-                this._rewardVideoAdStatus = this._rewardVideoAdStatus_Enum.present;
+                this._rewardVideoAdStatus = this._AdStatus_Enum.present;
                 break;
             default:
                 break;
@@ -122,7 +122,7 @@ AdMobObj.prototype._listen = function () {
 
     // 用户点击了广告
     window['document']['addEventListener']('onAdLeaveApp', function (info) {
-        logManager.LOGD("onAdLeaveApp..." + info);
+        logManager.LOGD("onAdLeaveApp...", info, info['adType']);
 
         switch (info['adType']) {
             case 'banner':
@@ -139,32 +139,43 @@ AdMobObj.prototype._listen = function () {
 
     // 关闭
     window['document']['addEventListener']('onAdDismiss', function (info) {
-        logManager.LOGD("onAdDismiss..." + info);
+        logManager.LOGD("onAdDismiss...", info, info['adType']);
         // TODO
         switch (info['adType']) {
             case 'banner':
                 break;
             case 'interstitial':
-            	// 是否成功播放完
-                if (this._interstitialAdStatus === this._rewardVideoAdStatus_Enum.present) {
-                    this._interstitialSuccessCallback && this._interstitialSuccessCallback();
-                } else {
-                    this._interstitialFailCallback && this._interstitialFailCallback();
+                try {// 外部调用不可信
+
+                    // 是否成功播放完
+                    if (this._interstitialAdStatus === this._AdStatus_Enum.present) {
+                        this._interstitialSuccessCallback && this._interstitialSuccessCallback();
+                    } else {
+                        this._interstitialFailCallback && this._interstitialFailCallback();
+                    }
+
+                } catch (e) {
+                    logManager.LOGE("onAdDismiss...", info['adType'], JSON.stringify(e));
                 }
-                this._interstitialAdStatus = this._rewardVideoAdStatus_Enum.dismiss;
+
+                this._interstitialAdStatus = this._AdStatus_Enum.dismiss;
                 this._interstitialSuccessCallback = null;
                 this._interstitialFailCallback = null;
                 this._initInterstitial();
 
                 break;
             case 'rewardvideo':
-                // 是否成功播放完
-                if (this._rewardVideoAdStatus === this._rewardVideoAdStatus_Enum.present) {
-                    this._rewardVideoSuccessCallback && this._rewardVideoSuccessCallback();
-                } else {
-                    this._rewardVideoFailCallback && this._rewardVideoFailCallback();
+                try {// 外部调用不可信
+                    // 是否成功播放完
+                    if (this._rewardVideoAdStatus === this._AdStatus_Enum.present) {
+                        this._rewardVideoSuccessCallback && this._rewardVideoSuccessCallback();
+                    } else {
+                        this._rewardVideoFailCallback && this._rewardVideoFailCallback();
+                    }
+                } catch (e) {
+                    logManager.LOGE("onAdDismiss...", info['adType'], JSON.stringify(e));
                 }
-                this._rewardVideoAdStatus = this._rewardVideoAdStatus_Enum.dismiss;
+                this._rewardVideoAdStatus = this._AdStatus_Enum.dismiss;
                 this._rewardVideoSuccessCallback = null;
                 this._rewardVideoFailCallback = null;
                 this._initRewardVideoAd();
@@ -192,14 +203,14 @@ AdMobObj.prototype._initInterstitial = function () {
     logManager.LOGD("_initInterstitial...admobid:" + JSON.stringify(this._admobid) + "ad_units:" + JSON.stringify(this._ad_units));
 
     window['AdMob']['prepareInterstitial']({
-	        adId: this._admobid.interstitial,
-	        isTesting: this._ad_units.isTest,
-	        autoShow: false
-    	}, function (info) {
-    		this._interstitialAdStatus = this._rewardVideoAdStatus_Enum.loading;
-    	}.bind(this), function (info) {
-    		this._interstitialAdStatus = this._rewardVideoAdStatus_Enum.loadedfail;
-    	}.bind(this)
+            adId: this._admobid.interstitial,
+            isTesting: this._ad_units.isTest,
+            autoShow: false
+        }, function (info) {
+            this._interstitialAdStatus = this._AdStatus_Enum.loading;
+        }.bind(this), function (info) {
+            this._interstitialAdStatus = this._AdStatus_Enum.loadedfail;
+        }.bind(this)
     );
 };
 
@@ -207,14 +218,14 @@ AdMobObj.prototype._initRewardVideoAd = function () {
     logManager.LOGD("_initRewardVideoAd...admobid:" + JSON.stringify(this._admobid) + "ad_units:" + JSON.stringify(this._ad_units));
 
     window['AdMob']['prepareRewardVideoAd']({
-	        adId: this._admobid.rewardvideo,
-	        isTesting: this._ad_units.isTest,
-	        autoShow: false
-    	}, function (info) {
-    		this._rewardVideoAdStatus = this._rewardVideoAdStatus_Enum.loading;
-    	}.bind(this), function (info) {
-    		this._rewardVideoAdStatus = this._rewardVideoAdStatus_Enum.loadedfail;
-    	}.bind(this)
+            adId: this._admobid.rewardvideo,
+            isTesting: this._ad_units.isTest,
+            autoShow: false
+        }, function (info) {
+            this._rewardVideoAdStatus = this._AdStatus_Enum.loading;
+        }.bind(this), function (info) {
+            this._rewardVideoAdStatus = this._AdStatus_Enum.loadedfail;
+        }.bind(this)
     );
 };
 
@@ -254,7 +265,7 @@ AdMobObj.prototype.showInterstitial = function (successCallback, failureCallback
     this._interstitialSuccessCallback = successCallback;
     this._interstitialFailCallback = failureCallback;
 
-    if (this._interstitialAdStatus === this._rewardVideoAdStatus_Enum.loaded) {
+    if (this._interstitialAdStatus === this._AdStatus_Enum.loaded) {
         logManager.LOGD("loaded......");
 
         window['AdMob']['isInterstitialReady'](function (isReady) {
@@ -281,18 +292,17 @@ AdMobObj.prototype.showInterstitial = function (successCallback, failureCallback
 
             }
         }.bind(this));
-    } else if (this._interstitialAdStatus === this._rewardVideoAdStatus_Enum.loadedfail
-        || this._interstitialAdStatus === this._rewardVideoAdStatus_Enum.dismiss ) {
+    } else if (this._interstitialAdStatus === this._AdStatus_Enum.loadedfail
+        || this._interstitialAdStatus === this._AdStatus_Enum.dismiss) {
         logManager.LOGD("loadedfail or dismiss......");
 
-        this._interstitialSuccessCallback = successCallback;
-        this._interstitialFailCallback = failureCallback;
-
-        failureCallback();
+        this._interstitialSuccessCallback = null;
+        this._interstitialFailCallback = null;
 
         this._initInterstitial();
-    }else{
-        logManager.LOGE("AdMobObj.showInterstitial not loaded...");
+        failureCallback();
+    } else {
+        logManager.LOGD("AdMobObj.showInterstitial not loaded..._interstitialAdStatus:", this._interstitialAdStatus);
         this._interstitialSuccessCallback = null;
         this._interstitialFailCallback = null;
 
@@ -302,11 +312,11 @@ AdMobObj.prototype.showInterstitial = function (successCallback, failureCallback
 
 AdMobObj.prototype.showRewardVideoAd = function (successCallback, failureCallback) {
     logManager.LOGD("AdMobObj.showRewardVideoAd....");
-    
+
     this._rewardVideoSuccessCallback = successCallback;
     this._rewardVideoFailCallback = failureCallback;
 
-    if (this._rewardVideoAdStatus === this._rewardVideoAdStatus_Enum.loaded) {
+    if (this._rewardVideoAdStatus === this._AdStatus_Enum.loaded) {
         logManager.LOGD("loaded......");
 
         window['AdMob']['showRewardVideoAd'](function () {
@@ -318,17 +328,29 @@ AdMobObj.prototype.showRewardVideoAd = function (successCallback, failureCallbac
 
             failureCallback();
         }.bind(this));
-    } else if(this._rewardVideoAdStatus === this._rewardVideoAdStatus_Enum.loadedfail
-        || this._rewardVideoAdStatus === this._rewardVideoAdStatus_Enum.dismiss ) {
+    } else if (this._rewardVideoAdStatus === this._AdStatus_Enum.loadedfail
+        || this._rewardVideoAdStatus === this._AdStatus_Enum.dismiss) {
         logManager.LOGD("AdMobObj.showRewardVideoAd loadedfail or dismiss......");
 
-        this._rewardVideoSuccessCallback = successCallback;
-        this._rewardVideoFailCallback = failureCallback;
-        failureCallback();
+        this._rewardVideoSuccessCallback = null;
+        this._rewardVideoFailCallback = null;
 
         this._initRewardVideoAd();
-    }else{
-        logManager.LOGE("AdMobObj.showRewardVideoAd not loaded...");
+        failureCallback();
+    } else if (this._rewardVideoAdStatus === this._AdStatus_Enum.loading) {
+        logManager.LOGD("AdMobObj.showRewardVideoAd is in loading...");
+        this._rewardVideoSuccessCallback = null;
+        this._rewardVideoFailCallback = null;
+
+        failureCallback();
+    } else if (this._rewardVideoAdStatus === this._AdStatus_Enum.present) {
+        logManager.LOGD("AdMobObj.showRewardVideoAd is present...");
+        this._rewardVideoSuccessCallback = null;
+        this._rewardVideoFailCallback = null;
+
+        failureCallback();
+    } else {
+        logManager.LOGD("AdMobObj.showRewardVideoAd is ..._rewardVideoAdStatus:" + this._rewardVideoAdStatus);
         this._rewardVideoSuccessCallback = null;
         this._rewardVideoFailCallback = null;
 
@@ -337,9 +359,9 @@ AdMobObj.prototype.showRewardVideoAd = function (successCallback, failureCallbac
 };
 
 AdMobObj.prototype.showAdsWithPolicy = function (successCallback, failureCallback) {
-	this.showRewardVideoAd(successCallback, function () {
-		this.showInterstitial(successCallback, failureCallback);
-	}.bind(this));
+    this.showRewardVideoAd(successCallback, function () {
+        this.showInterstitial(successCallback, failureCallback);
+    }.bind(this));
 };
 
 module.exports = AdMobObj;

@@ -9,7 +9,7 @@ let logManager = require('./sdk_log');
 let tool = {};
 
 tool.getBase64Image = function (imageUrl, callback) {
-	imageUrl = imageUrl.replace('http', 'https');
+	imageUrl.indexOf('https') === -1 && (imageUrl = imageUrl.replace('http', 'https'));
 
 	let xhr = new XMLHttpRequest();
 	xhr.open('get', imageUrl, true);

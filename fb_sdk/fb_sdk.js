@@ -118,12 +118,14 @@ FBSDK.prototype.shareToTimeline = function (title, imageUrl, extraInfo, successC
 			'text': title,
 			'data': extraInfo
 		}).then((ret) => {
+			logManager.LOGD('shareToTimeline successful ' + JSON.stringify(ret));
+
 			// 分享出去或者关闭对话框都会走这里
-			successCallback && successCallback(ret);
+			successCallback && successCallback(extraInfo);
 		}).catch((err) => {
 			logManager.LOGD('shareToTimeline error ' + JSON.stringify(err));
 
-			failureCallback && failureCallback();
+			failureCallback && failureCallback(extraInfo);
 		});
 	});
 };
@@ -140,7 +142,7 @@ FBSDK.prototype.shareToFriend = function (type, title, imageUrl, extraInfo, succ
 		}).then((ret) => {
 			logManager.LOGD('shareToFriend successful ' + JSON.stringify(ret));
 
-			successCallback && successCallback(ret);
+			successCallback && successCallback(extraInfo);
 
 			FBInstant.updateAsync({
 				'action': 'CUSTOM',
@@ -165,7 +167,7 @@ FBSDK.prototype.shareToFriend = function (type, title, imageUrl, extraInfo, succ
 		}).catch((err) => {
 			logManager.LOGD('shareToFriend error ' + JSON.stringify(err));
 
-			failureCallback && failureCallback();
+			failureCallback && failureCallback(extraInfo);
 		});
 	});
 };
