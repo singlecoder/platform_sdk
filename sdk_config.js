@@ -4,7 +4,7 @@
  * create by zengxx on 2018-11-22
  */
 
-var config = {};
+let config = {};
 
 // 项目配置的一些基本信息
 config.baseInfo = {

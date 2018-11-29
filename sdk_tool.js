@@ -5,6 +5,7 @@
  */
 
 let logManager = require('./sdk_log');
+let config = require('./sdk_config');
 
 let tool = {};
 
@@ -96,6 +97,36 @@ tool.getDevicePlatform = function () {
     } else {
         return '';
     }
+};
+
+/*
+ * 获取当前平台的clientId
+ */
+tool.getClientId = function () {
+	let clientId = '';
+
+	if (tool.getPublishPlatform() === 'cordova') {
+		clientId = config.SystemInfo.clientIds[tool.getPublishPlatform()][tool.getDevicePlatform()] || '';
+	} else {
+		clientId = config.SystemInfo.clientIds[tool.getPublishPlatform()] || '';
+	}
+
+	return clientId;
+};
+
+/*
+ * 获取当前平台的clientId的int值
+ */
+tool.getIntClientId = function () {
+	let intClientId = 0;
+
+	if (tool.getPublishPlatform() === 'cordova') {
+		intClientId = config.SystemInfo.intClientIds[tool.getPublishPlatform()][tool.getDevicePlatform()] || 0;
+	} else {
+		intClientId = config.SystemInfo.intClientIds[tool.getPublishPlatform()] || 0;
+	}
+
+	return intClientId;
 };
 
 module.exports = tool;

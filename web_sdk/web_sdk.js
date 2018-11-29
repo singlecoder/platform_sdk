@@ -14,6 +14,8 @@ let WebSDK = function () {
 };
 
 WebSDK.prototype.loginByGuest = function (successCallback, failureCallback) {
+	config.UserInfo.device_id = tool.getUuid();
+
 	loginManager.loginByGuest(tool.getUuid()).then((ret) => {
 		logManager.LOGD('WebSDK.loginByGuest successful ' + JSON.stringify(ret));
 
@@ -26,6 +28,8 @@ WebSDK.prototype.loginByGuest = function (successCallback, failureCallback) {
 };
 
 WebSDK.prototype.loginBySnsIdNoVerify = function (successCallback, failureCallback) {
+	config.UserInfo.device_id = tool.getUuid();
+	
 	loginManager.loginBySnsIdNoVerify(tool.getUuid()).then((ret) => {
 		logManager.LOGD('WebSDK.loginBySnsIdNoVerify successful ' + JSON.stringify(ret));
 

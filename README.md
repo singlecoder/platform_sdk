@@ -6,3 +6,5 @@ the sdk offer some general api for multiple platforms, implemented in js
 ## support platform
 cordova、facebook instant game、wechat mini game
 
+## TODO
+代码里面有 "// TODO" 的地方均需要自行实现 

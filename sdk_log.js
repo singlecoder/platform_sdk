@@ -4,20 +4,20 @@
  * create by zengxx on 2018-11-22
  */
 
-var config = require('./sdk_config');
+let config = require('./sdk_config');
 
-var log = {};
+let log = {};
 
-var adapter = function (name, func) {
-    var _name = name;
+let adapter = function (name, func) {
+    let _name = name;
 
     return function () {
         if (!config.baseInfo.debug) {
             return ;
         }
         
-        var info = 'sdk.' + _name + '  ===>  ';
-        for (var i=0, len = arguments.length; i<len;i++) {
+        let info = 'sdk.' + _name + '  ===>  ';
+        for (let i=0, len = arguments.length; i<len;i++) {
             if (arguments[i] === undefined) {
                 info += "undefined" + ' ';
             } else {

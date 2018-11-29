@@ -10,6 +10,7 @@ let config = require('./sdk_config');
 let logManager = require('./sdk_log');
 let bi = require('./sdk_bi');
 let tool = require('./sdk_tool');
+let propagate = require('./sdk_propagate');
 
 // SDK 实例
 let _instance = null;
@@ -66,15 +67,55 @@ class SDK {
             Object.defineProperty(this.ENUM, key, {
                 'writable': false
             });
-        };
+        }
     }
 
-    // bi日志上报
+    /***** 放置和公司sdk相关的api *****/
+
+    // bi日志上报，eventId必须大于100000
     sendBIEvent (eventId, eventParams) {
-        bi.sendBIEvent(eventId, eventParams);
+        bi.sendEvent(eventId, eventParams);
+    }
+
+    // 获取Propagate数据
+    getPropagateInfo () {
+        return propagate.getShareConfigInfoAutoWeight();
+    }
+
+    // 根据分享tag从Propagate获取单个分享点配置
+    getShareInfoByTag (tag) {
+        let info = this.getPropagateInfo();
+        let config = info[tag] || null;
+
+        return config;
+    }
+
+    // 随机获取一个分享点配置
+    getShareInfoByRandom () {
+        let config = null;
+        let shareKeys = [];
+        let info = this.getPropagateInfo();
+
+        for(let key in info){
+            shareKeys.push(key);
+        }
+
+        if (shareKeys && shareKeys.length > 0) {
+            let randomIndex = (Math.floor(Math.random() * 10000)) % shareKeys.length;
+            let sharePointKey = shareKeys[randomIndex];
+            let config = info[sharePointKey];
+        }
+
+        return config;
     }
 
     /***** 放置接入的各平台相关的api *****/
+
+    // 主要给需要的平台获取启动场景的参数，在主场景的onLoad中调用
+    onLaunch () {
+        logManager.LOGD('sdk.onLaunch...');
+        this._sdk.onLaunch && this._sdk.onLaunch();
+    }
 
     showBanner (position) {
         logManager.LOGD("sdk.showBanner...");

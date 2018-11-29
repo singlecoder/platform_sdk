@@ -9,6 +9,7 @@ var logManager = require('../sdk_log');
 var loginManager = require('../sdk_login');
 var config = require('../sdk_config');
 var sdkTool = require('../sdk_tool');
+var bi = require('../sdk_bi');
 
 var FBSDK = function () {
 	// 广告模块
@@ -22,6 +23,67 @@ var FBSDK = function () {
 
 	this._initInterstitial();
 	this._initRewardVideoAd();
+};
+
+FBSDK.prototype.onLaunch = function () {
+	if (FBSDK.isInited) {
+		return ;
+	} else {
+		FBSDK.isInited = true;
+	}
+
+	//运行场景上下文,  POST - A facebook post. THREAD - A messenger thread. GROUP - A facebook group. SOLO - Default context
+	var contextType = FBInstant.context.getType();
+	//启动参数元数据,可能为null
+    var entryPointData = FBInstant.getEntryPointData() || {};
+
+    FBInstant.getEntryPointAsync().then((entrypoint) => {
+    	logManager.LOGD('getEntryPointAsync successful ' + entrypoint);
+
+    	//类似于微信小游戏的进入的场景参数
+        // game_switch          (游戏切换启动）                                                                              *
+        // other                (本地调试启动）                                                                              *
+        // game_composer        (pc版messenger中启动)
+        // games_hub            (客户端messenger中启动)
+        // admin_message        (Game plays coming from a custom update within a messenger thread)          custom update                  updateAsync
+        // bookmark             (来自Facebook 游戏列表中的书签界面)
+        // bot_cta              (Game plays that began from a call-to-action attached to a Messenger bot message)          *
+        // bot_menu             (Game plays that began from a Messenger bot menu)
+        // custom_share         (Game plays started from custom shares created by the game with the share API)
+        // facebook_web         (Game plays started from the Facebook front page on web)
+        // feed                 (Game plays started from a Facebook feed)
+        // game_cta             (Game plays that began from various call-to-action buttons on Messenger and Facebook)
+        // game_search          (Game plays coming from players searching in Messenger and Facebook search)
+        // game_share           (Game plays started from a generic player share of the Instant Game)
+        // gameroom             (Game plays coming from Facebook Gameroom)
+        // group                (Game plays that started from an entry point in a Facebook group)
+        // home_screen_shortcut (Game plays coming from our Home Screen Shortcuts API (Android Only))
+        // menu                 (Game plays coming from a Messenger menu)
+        // notification         (Game plays initiated by a player engaging with a Facebook notification)
+        // shareable_link       (Game plays that began from a deep link to the game (such as our Instant Game “m.me” links))
+        // score_share          (Game plays that started from a played-shared score)
+        // video_call           (Game plays coming from the Messenger video chat entry point)
+        // web_games_hub        (Game plays started from the Instant Games hub on web, located here)
+        
+        var event_param = entryPointData;
+        if(!event_param.from_type){
+            event_param.from_type = 'normal';
+            event_param.from_param = '';
+        }
+        event_param.entrypoint = entryPoint;
+        event_param.fb_id = FBInstant.player.getID().toString();
+        event_param.contextType = contextType;
+
+        config.UserInfo.scene_id = entryPoint;
+        config.UserInfo.scene_param = event_param;
+        config.UserInfo.device_id = sdkTool.uuidTo32(FBInstant.player.getID());
+
+        bi.innerSendEvent(bi.ENUM.ON_LAUNCH, event_param);
+
+    }).catch((err) => {
+    	logManager.LOGD('getEntryPointAsync fail ' + JSON.stringify(err));
+
+    });
 };
 
 /***** 广告模块 *****/
@@ -109,6 +171,20 @@ FBSDK.prototype.showAdsWithPolicy = function (successCallback, failureCallback) 
  * extraInfo: 扩展信息
  */
 FBSDK.prototype.shareToTimeline = function (title, imageUrl, extraInfo, successCallback, failureCallback) {
+	// bi打点信息
+	var extData = {
+        'from_type': 'share',
+        'share_type': 'indirect',
+        'share_uuid' : config.UserInfo.uuid.toString(),
+        'from_user_id' : config.UserInfo.userId.toString(),
+        'from_fb_id' : config.UserInfo.playerId.toString(),
+        'fb_id' : config.UserInfo.playerId.toString(),
+        'share_point_id' : extraInfo.sharePointId,
+        'share_scheme_id' : extraInfo.shareSchemeId
+    };
+
+    bi.innerSendEvent(bi.ENUM.FB_SHARE_SYNC, extData);
+
 	sdkTool.getBase64Image(imageUrl, (imageBase64) => {
 		logManager.LOGD('get base64 image result ' + imageBase64);
 
@@ -136,11 +212,29 @@ FBSDK.prototype.shareToTimeline = function (title, imageUrl, extraInfo, successC
  * type: 分享类型，'friend':分享给好友 'group':分享到群
  */
 FBSDK.prototype.shareToFriend = function (type, title, imageUrl, extraInfo, successCallback, failureCallback) {
+	// bi打点信息
+	var extData = {
+        'from_type': 'share',
+        'share_type': type,
+        'share_uuid' : config.UserInfo.uuid.toString(),
+        'from_user_id' : config.UserInfo.userId.toString(),
+        'from_fb_id' : config.UserInfo.playerId.toString(),
+        'fb_id' : config.UserInfo.playerId.toString(),
+        'share_point_id' : extraInfo.sharePointId,
+        'share_scheme_id' : extraInfo.shareSchemeId
+    };
+
+    var eventId = type === 'friend' ? bi.ENUM.FB_SHARE_FRIEND : bi.ENUM.FB_SHARE_GROUP;
+    bi.innerSendEvent(eventId, extData);
+
 	sdkTool.getBase64Image(imageUrl, (imageBase64) => {
 		FBInstant.context.chooseAsync({
 			'minSize': type === 'friend' ? 0 : 3
 		}).then((ret) => {
 			logManager.LOGD('shareToFriend successful ' + JSON.stringify(ret));
+
+			var eventId = type === 'friend' ? bi.ENUM.FB_SHARE_FRIEND_SUCCESS : bi.ENUM.FB_SHARE_GROUP_SUCCESS;
+   			bi.innerSendEvent(eventId, extData);
 
 			successCallback && successCallback(extraInfo);
 
@@ -167,6 +261,9 @@ FBSDK.prototype.shareToFriend = function (type, title, imageUrl, extraInfo, succ
 		}).catch((err) => {
 			logManager.LOGD('shareToFriend error ' + JSON.stringify(err));
 
+			var eventId = type === 'friend' ? bi.ENUM.FB_SHARE_FRIEND_FAIL : bi.ENUM.FB_SHARE_GROUP_FAIL;
+   			bi.innerSendEvent(eventId, extData);
+
 			failureCallback && failureCallback(extraInfo);
 		});
 	});
@@ -175,8 +272,16 @@ FBSDK.prototype.shareToFriend = function (type, title, imageUrl, extraInfo, succ
 /***** 登录模块 *****/
 
 FBSDK.prototype.loginBySnsId = function (successCallback, failureCallback) {
+	bi.innerSendEvent(bi.ENUM.GET_FB_PLAYER_INFO_START, config.UserInfo.scene_param);
+
 	FBInstant.player.getSignedPlayerInfoAsync('my_metadata').then((result) => {
 		logManager.LOGD('FBInstant.getSignedPlayerInfoAsync successful ' + JSON.stringify(result));
+
+		bi.innerSendEvent(bi.ENUM.GET_FB_PLAYER_INFO_SUCCESS, config.UserInfo.scene_param);
+
+		// 初始化一些配置信息
+		config.UserInfo.playerId = result.getPlayerID();
+		config.UserInfo.device_id = sdkTool.uuidTo32(FBInstant.player.getID());
 
 		return loginManager.loginBySnsIdNoVerify(result.getPlayerID(), {
 			'snsId': 'fbinstant:' + result.getPlayerID(),
@@ -191,6 +296,8 @@ FBSDK.prototype.loginBySnsId = function (successCallback, failureCallback) {
 		successCallback();
 	}).catch((err) => {
 		logManager.LOGD('FBSDK.loginBySnsId error ' + JSON.stringify(err));
+
+		bi.innerSendEvent(bi.ENUM.GET_FB_PLAYER_INFO_FAIL, config.UserInfo.scene_param);
 
 		failureCallback();
 	});

@@ -4,12 +4,12 @@
  * create by zengxx on 2018-11-24
  */
 
-var config = require('./sdk_config');
-var logManager = require('./sdk_log');
-var httpManager = require('./sdk_http');
-var tool = require('./sdk_tool');
+let config = require('./sdk_config');
+let logManager = require('./sdk_log');
+let httpManager = require('./sdk_http');
+let tool = require('./sdk_tool');
 
-var login = {};
+let login = {};
 
 /*
  * 从sdk服务器获取token

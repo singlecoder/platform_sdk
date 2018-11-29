@@ -105,7 +105,7 @@ AdMobObj.prototype._listen = function () {
     window['document']['addEventListener']('onAdPresent', function (info) {
         logManager.LOGD("onAdPresent...", info, info['adType']);
         // logManager.LOGD("onAdPresent..." + JSON.stringify(info));
-        // TODO
+
         switch (info['adType']) {
             case 'banner':
                 break;
@@ -140,7 +140,7 @@ AdMobObj.prototype._listen = function () {
     // 关闭
     window['document']['addEventListener']('onAdDismiss', function (info) {
         logManager.LOGD("onAdDismiss...", info, info['adType']);
-        // TODO
+        
         switch (info['adType']) {
             case 'banner':
                 break;
